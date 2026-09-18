@@ -102,7 +102,9 @@ end
 
 local function findNpc(name)
 	local normalizedTarget = normalizeName(name)
-	local containers = {workspace:FindFirstChild("NPCs"), workspace:FindFirstChild("Map"), workspace}
+	local npcFolder = workspace:FindFirstChild("NPCs")
+	local mapFolder = workspace:FindFirstChild("Map")
+	local containers = {npcFolder, mapFolder, workspace}
 
 	for _, container in ipairs(containers) do
 		if container then
@@ -113,7 +115,7 @@ local function findNpc(name)
 		end
 	end
 
-	for _, container in ipairs(containers) do
+	for _, container in ipairs({npcFolder, mapFolder}) do
 		if container then
 			for _, object in ipairs(container:GetDescendants()) do
 				if object:IsA("Model") then
@@ -134,18 +136,21 @@ local function findNpc(name)
 end
 
 local function teleportToNpc(name)
-	local character = player.Character
-	local root = character and character:FindFirstChild("HumanoidRootPart")
-	local npc = findNpc(name)
-	local npcRoot = npc and (npc.PrimaryPart or npc:FindFirstChild("HumanoidRootPart") or npc:FindFirstChildWhichIsA("BasePart"))
-	if not root then
+	for _ = 1, 3 do
+		local character = player.Character
+		local root = character and character:FindFirstChild("HumanoidRootPart")
+		local npc = findNpc(name)
+		local npcRoot = npc and (npc.PrimaryPart or npc:FindFirstChild("HumanoidRootPart") or npc:FindFirstChildWhichIsA("BasePart"))
+		if root and npcRoot then
+			character:PivotTo(npcRoot.CFrame + Vector3.new(0, 3, 0))
+			return true, "Teleported to " .. name
+		end
+		task.wait(0.2)
+	end
+	if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then
 		return false, "Character not ready"
 	end
-	if not npcRoot then
-		return false, name .. " not found"
-	end
-	character:PivotTo(npcRoot.CFrame + Vector3.new(0, 3, 0))
-	return true, "Teleported to " .. name
+	return false, name .. " not found"
 end
 
 local gui = Instance.new("ScreenGui")
@@ -372,6 +377,11 @@ local farmCorner = Instance.new("UICorner")
 farmCorner.CornerRadius = UDim.new(0, 7)
 farmCorner.Parent = farmButton
 
+local farmStroke = Instance.new("UIStroke")
+farmStroke.Color = Color3.fromRGB(52, 68, 91)
+farmStroke.Transparency = 0.25
+farmStroke.Parent = farmButton
+
 local status = Instance.new("TextLabel")
 status.Position = UDim2.fromOffset(25, 240)
 status.Size = UDim2.new(1, -50, 0, 20)
@@ -383,6 +393,18 @@ status.TextSize = 11
 status.TextXAlignment = Enum.TextXAlignment.Left
 status.Parent = content
 
+local statusDot = Instance.new("Frame")
+statusDot.AnchorPoint = Vector2.new(1, 0.5)
+statusDot.Position = UDim2.new(1, -25, 0.5, 0)
+statusDot.Size = UDim2.fromOffset(8, 8)
+statusDot.BackgroundColor3 = Color3.fromRGB(137, 151, 173)
+statusDot.BorderSizePixel = 0
+statusDot.Parent = content
+
+local statusDotCorner = Instance.new("UICorner")
+statusDotCorner.CornerRadius = UDim.new(1, 0)
+statusDotCorner.Parent = statusDot
+
 local enabled = false
 local function setEnabled(value)
 	enabled = value
@@ -390,6 +412,7 @@ local function setEnabled(value)
 	farmButton.BackgroundColor3 = enabled and Color3.fromRGB(34, 91, 133) or Color3.fromRGB(29, 37, 51)
 	status.Text = enabled and "Status: running" or "Status: idle"
 	status.TextColor3 = enabled and Color3.fromRGB(116, 211, 255) or Color3.fromRGB(137, 151, 173)
+	statusDot.BackgroundColor3 = enabled and Color3.fromRGB(91, 197, 145) or Color3.fromRGB(137, 151, 173)
 end
 
 farmButton.Activated:Connect(function()
@@ -449,6 +472,7 @@ task.spawn(function()
 			if not npc then
 				status.Text = "Status: detecting level"
 				status.TextColor3 = Color3.fromRGB(255, 185, 114)
+				statusDot.BackgroundColor3 = Color3.fromRGB(241, 181, 82)
 				routeIndicator.BackgroundColor3 = Color3.fromRGB(241, 181, 82)
 			else
 				local ok, success, message = pcall(teleportToNpc, npc)
@@ -457,12 +481,16 @@ task.spawn(function()
 					status.TextColor3 = success
 						and Color3.fromRGB(116, 211, 255)
 						or Color3.fromRGB(255, 185, 114)
+					statusDot.BackgroundColor3 = success
+						and Color3.fromRGB(91, 197, 145)
+						or Color3.fromRGB(220, 91, 91)
 					routeIndicator.BackgroundColor3 = success
 						and Color3.fromRGB(91, 197, 145)
 						or Color3.fromRGB(220, 91, 91)
 				else
 					status.Text = "Status: waiting for character"
 					status.TextColor3 = Color3.fromRGB(255, 185, 114)
+					statusDot.BackgroundColor3 = Color3.fromRGB(220, 91, 91)
 					routeIndicator.BackgroundColor3 = Color3.fromRGB(220, 91, 91)
 				end
 			end
