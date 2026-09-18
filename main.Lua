@@ -67,14 +67,14 @@ local routes = {
 }
 
 local function getPlayerLevel()
-	local data = player:FindFirstChild("Data")
-	local levelValue = data and data:FindFirstChild("Level")
+	local data = player:FindFirstChild("Data") or player:WaitForChild("Data", 5)
+	local levelValue = data and (data:FindFirstChild("Level") or data:WaitForChild("Level", 5))
 	if levelValue and tonumber(levelValue.Value) then
 		return tonumber(levelValue.Value)
 	end
 
-	local stats = player:FindFirstChild("leaderstats")
-	levelValue = stats and stats:FindFirstChild("Level")
+	local stats = player:FindFirstChild("leaderstats") or player:WaitForChild("leaderstats", 2)
+	levelValue = stats and (stats:FindFirstChild("Level") or stats:WaitForChild("Level", 2))
 	if levelValue and tonumber(levelValue.Value) then
 		return tonumber(levelValue.Value)
 	end
@@ -116,8 +116,15 @@ local function findNpc(name)
 	for _, container in ipairs(containers) do
 		if container then
 			for _, object in ipairs(container:GetDescendants()) do
-				if object:IsA("Model") and normalizeName(object.Name) == normalizedTarget then
-					return object
+				if object:IsA("Model") then
+					local objectName = normalizeName(object.Name)
+					local hasHumanoid = object:FindFirstChildOfClass("Humanoid") ~= nil
+					local sameName = objectName == normalizedTarget
+					local compatibleName = objectName:find(normalizedTarget, 1, true)
+						or normalizedTarget:find(objectName, 1, true)
+					if hasHumanoid and (sameName or compatibleName) then
+						return object
+					end
 				end
 			end
 		end
