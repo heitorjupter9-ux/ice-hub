@@ -56,14 +56,14 @@ local routes = {
 	{1975, 1999, "Castle on the Sea Quest Giver"},
 	{2000, 2024, "Haunted Castle Quest Giver"},
 	{2025, 2074, "Haunted Castle Quest Giver"},
-	{2075, 2124, "Sea of Treats Quest Giver"},
-	{2125, 2174, "Sea of Treats Quest Giver"},
-	{2175, 2224, "Sea of Treats Quest Giver"},
-	{2225, 2274, "Sea of Treats Quest Giver"},
-	{2275, 2324, "Sea of Treats Quest Giver"},
-	{2325, 2374, "Sea of Treats Quest Giver"},
-	{2375, 2424, "Cake Land Quest Giver"},
-	{2425, 9999, "Cake Land Quest Giver"},
+	{2075, 2124, "Candy Quest Giver"},
+	{2125, 2174, "Candy Quest Giver"},
+	{2175, 2224, "Candy Quest Giver"},
+	{2225, 2274, "Cake Quest Giver"},
+	{2275, 2324, "Cake Quest Giver"},
+	{2325, 2374, "Cake Quest Giver"},
+	{2375, 2424, "Cake Quest Giver"},
+	{2425, 9999, "Cake Quest Giver"},
 }
 
 local function getPlayerLevel()
